@@ -1,0 +1,2469 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZONA — ARCHIVO CENTRALIZADO</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@300;400;600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ═══ LOGIN ═══ -->
+    <div id="screen-login">
+      <svg
+        class="login-emblem"
+        viewBox="0 0 100 100"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="50" cy="50" r="46" stroke="#8B1A1A" stroke-width="2" />
+        <circle
+          cx="50"
+          cy="50"
+          r="38"
+          stroke="#C8A84B"
+          stroke-width="0.8"
+          opacity="0.5"
+        />
+        <!-- Estrella soviética -->
+        <polygon
+          points="50,18 55.9,36.2 75.1,36.2 59.6,47.0 65.5,65.2 50,54.4 34.5,65.2 40.4,47.0 24.9,36.2 44.1,36.2"
+          fill="#8B1A1A"
+          stroke="#C8A84B"
+          stroke-width="0.8"
+        />
+        <!-- Ojos: triángulo superior -->
+        <circle
+          cx="50"
+          cy="44"
+          r="6"
+          fill="none"
+          stroke="#C8A84B"
+          stroke-width="1.2"
+        />
+        <circle cx="50" cy="44" r="2.5" fill="#C8A84B" opacity="0.9" />
+        <!-- Texto inferior -->
+        <text
+          x="50"
+          y="90"
+          font-family="serif"
+          font-size="7"
+          fill="#8B1A1A"
+          text-anchor="middle"
+          letter-spacing="3"
+        >
+          ЗОНА
+        </text>
+      </svg>
+      <div class="login-title-ru">АРХИВ ЗОНЫ</div>
+      <div class="login-title-es">ARCHIVO CENTRALIZADO — ZONA</div>
+      <div class="login-subtitle">
+        SISTEMA MOSCÚ · NODO PRINCIPAL · CLASIFICADO
+      </div>
+      <div class="login-divider"></div>
+      <div class="login-box">
+        <label class="login-label">CREDENCIALES DE ACCESO</label>
+        <input
+          class="login-input"
+          id="login-user"
+          type="text"
+          placeholder="USUARIO"
+          maxlength="24"
+          autocomplete="off"
+          style="margin-bottom: 8px;"
+        />
+        <input
+          class="login-input"
+          id="login-pass"
+          type="password"
+          placeholder="CONTRASEÑA"
+          maxlength="24"
+          autocomplete="off"
+        />
+        <button class="login-btn" onclick="doLogin()">
+          ▶ ACCEDER AL SISTEMA
+        </button>
+        <div class="login-status" id="login-status">
+          SISTEMA EN ESPERA — ВВЕДИТЕ КОД
+        </div>
+      </div>
+      <div class="login-footer">
+        ACCESO NO AUTORIZADO · VIOLACIÓN DEL ART. 275 CP RF · PENA MÁXIMA<br />
+        ВЕРСИЯ 4.1.7 — © 1991 MINISTERIO DE DEFENSA
+      </div>
+    </div>
+
+    <!-- ═══ LOADING ═══ -->
+    <div id="screen-loading">
+      <div class="load-header">INICIANDO SISTEMA DE ARCHIVO CENTRALIZADO</div>
+      <div class="load-log" id="load-log"></div>
+      <div class="load-bar-wrap">
+        <div class="load-bar-fill" id="load-bar"></div>
+      </div>
+      <div class="load-pct" id="load-pct">0%</div>
+    </div>
+
+    <!-- ═══ MAIN APP ═══ -->
+    <div id="app" style="display: none; flex-direction: column">
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <div class="topbar-logo">
+          <svg class="topbar-emblem" viewBox="0 0 24 24" fill="none">
+            <polygon
+              points="12,3 14.5,9.5 21.5,9.5 16,13.5 18.2,20 12,16 5.8,20 8,13.5 2.5,9.5 9.5,9.5"
+              fill="#8B1A1A"
+              stroke="#C8A84B"
+              stroke-width="0.5"
+            />
+          </svg>
+          <div class="topbar-title">З О Н А</div>
+        </div>
+        <div class="topbar-sep"></div>
+        <div class="topbar-stat">
+          <span class="topbar-stat-label">NODO</span>
+          <span class="topbar-stat-val">MOSCÚ-CENTRAL</span>
+        </div>
+        <div class="topbar-sep"></div>
+        <div class="topbar-stat">
+          <span class="topbar-stat-label">ESTADO PERÍMETRO</span>
+          <span class="topbar-stat-val gold" id="perimeter-status">ACTIVO</span>
+        </div>
+        <div class="topbar-sep"></div>
+        <div class="topbar-stat">
+          <span class="topbar-stat-label">ANOMALÍAS ACTIVAS</span>
+          <span class="topbar-stat-val red" id="anomaly-count">██</span>
+        </div>
+        <div class="topbar-sep"></div>
+        <div class="topbar-stat">
+          <span class="topbar-stat-label">NIVEL ACCESO</span>
+          <span class="topbar-stat-val" id="topbar-access-level">NIVEL-3</span>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-time" id="topbar-time">00:00:00</div>
+          <div class="topbar-class">СЕКРЕТНО</div>
+          <button class="topbar-logout" onclick="doLogout()">SALIR</button>
+        </div>
+      </div>
+
+      <!-- MAIN LAYOUT -->
+      <div class="main-layout" style="flex: 1; overflow: hidden">
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+          <div class="sidebar-section-label">ARCHIVOS PRINCIPALES</div>
+
+          <div class="nav-item active" onclick="navTo('lore')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+              <rect
+                x="2"
+                y="1"
+                width="10"
+                height="14"
+                rx="1"
+                stroke="currentColor"
+                stroke-width="1.2"
+              />
+              <line
+                x1="4"
+                y1="5"
+                x2="10"
+                y2="5"
+                stroke="currentColor"
+                stroke-width="0.8"
+              />
+              <line
+                x1="4"
+                y1="7.5"
+                x2="10"
+                y2="7.5"
+                stroke="currentColor"
+                stroke-width="0.8"
+              />
+              <line
+                x1="4"
+                y1="10"
+                x2="8"
+                y2="10"
+                stroke="currentColor"
+                stroke-width="0.8"
+              />
+              <circle
+                cx="13"
+                cy="13"
+                r="2.5"
+                fill="currentColor"
+                opacity="0.8"
+              />
+            </svg>
+            <span class="nav-label">REGISTROS<br />GENERALES</span>
+            <span class="nav-badge">I-II</span>
+          </div>
+
+          <div class="nav-item" onclick="navTo('factions')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+              <circle
+                cx="8"
+                cy="5"
+                r="2.5"
+                stroke="currentColor"
+                stroke-width="1.2"
+              />
+              <circle
+                cx="3"
+                cy="11"
+                r="2"
+                stroke="currentColor"
+                stroke-width="1"
+              />
+              <circle
+                cx="13"
+                cy="11"
+                r="2"
+                stroke="currentColor"
+                stroke-width="1"
+              />
+              <line
+                x1="8"
+                y1="7.5"
+                x2="3"
+                y2="9"
+                stroke="currentColor"
+                stroke-width="0.8"
+              />
+              <line
+                x1="8"
+                y1="7.5"
+                x2="13"
+                y2="9"
+                stroke="currentColor"
+                stroke-width="0.8"
+              />
+            </svg>
+            <span class="nav-label">FACCIONES</span>
+            <span class="nav-badge">6</span>
+          </div>
+
+          <div class="nav-item" onclick="navTo('entities')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M8 2 L14 6 L14 11 L8 14 L2 11 L2 6 Z"
+                stroke="currentColor"
+                stroke-width="1.1"
+              />
+              <path
+                d="M8 5 L11 7 L11 10 L8 12 L5 10 L5 7 Z"
+                stroke="currentColor"
+                stroke-width="0.7"
+                opacity="0.6"
+              />
+              <circle
+                cx="8"
+                cy="8.5"
+                r="1.2"
+                fill="currentColor"
+                opacity="0.8"
+              />
+            </svg>
+            <span class="nav-label">ENTIDADES</span>
+            <span class="nav-badge">8</span>
+          </div>
+
+          <div class="nav-item" onclick="navTo('monitor')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+              <rect
+                x="1"
+                y="2"
+                width="14"
+                height="10"
+                rx="1"
+                stroke="currentColor"
+                stroke-width="1.1"
+              />
+              <polyline
+                points="3,8 5,5 7,9 9,6 11,8 13,7"
+                stroke="currentColor"
+                stroke-width="0.9"
+              />
+              <line
+                x1="5"
+                y1="14"
+                x2="11"
+                y2="14"
+                stroke="currentColor"
+                stroke-width="1.2"
+              />
+              <line
+                x1="8"
+                y1="12"
+                x2="8"
+                y2="14"
+                stroke="currentColor"
+                stroke-width="1"
+              />
+            </svg>
+            <span class="nav-label">MONITOREO<br />& REGISTRO</span>
+          </div>
+
+          <div style="flex: 1"></div>
+
+          <div style="padding: 12px 16px; border-top: 1px solid var(--border)">
+            <div
+              style="
+                font-size: 9px;
+                letter-spacing: 1px;
+                color: var(--cream3);
+                opacity: 0.4;
+                line-height: 1.8;
+              "
+            >
+              SESIÓN ACTIVA<br />
+              <span id="session-user" style="color: var(--gold3)"
+                >OPERADOR-██</span
+              ><br />
+              REV. 4.1.7-б
+            </div>
+          </div>
+        </nav>
+
+        <!-- CONTENT -->
+        <div class="content" id="main-content">
+          <!-- ══ LORE ══ -->
+<div class="section-page active" id="page-lore">
+  <div class="section-header">
+    <div>
+      <div class="section-title-ru">ИСТОРИЧЕСКИЕ АРХИВЫ</div>
+      <div class="section-title">REGISTROS GENERALES</div>
+    </div>
+    <div class="section-meta">
+      <div class="section-id">ARCH-HIST // CLASIFICACIÓN MÁXIMA</div>
+    </div>
+  </div>
+
+  <!-- REGISTRO I -->
+  <div class="panel open" id="p-lore1">
+    <div class="panel-header" onclick="togglePanel('p-lore1')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">CONTEXTO-PRE-EVENTO · REG-I</span>
+        <span class="panel-title">EL SISTEMA QUE SE FRACTURÓ</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge secreto">MÁXIMO SECRETO</span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ESTABLE</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="integrity-bar">
+        <span class="integrity-label">INTEGRIDAD:</span>
+        <div class="integrity-track">
+          <div class="integrity-fill" style="width: 100%"></div>
+        </div>
+        <span class="integrity-pct">100%</span>
+      </div>
+      <div class="hr"></div>
+      <div class="file-content">
+        <p>
+          A finales de la década de los ochenta, la Unión Soviética proyectaba
+          hacia el exterior una imagen de cohesión que no correspondía con su
+          funcionamiento interno. Las reformas implementadas no lograron
+          estabilizar el Estado; al contrario, lo fragmentaron. La acumulación
+          de crisis económicas, los conflictos políticos irresueltos y el
+          desgaste progresivo de las estructuras militares dejaron un sistema
+          que había dejado de responder como un cuerpo único. Los mandatos se
+          contradecían entre sí. Las regiones operaban de forma autónoma. El
+          centro perdió autoridad real.
+        </p>
+
+        <div class="file-section-title">PROYECTOS NO DECLARADOS</div>
+        <p>
+          En ese contexto de fractura estructural, fondos, equipamiento y
+          recursos humanos comenzaron a desaparecer de los registros oficiales.
+          No por negligencia administrativa, sino por diseño deliberado. Capital
+          estatal fue derivado hacia programas clandestinos, operados desde
+          instalaciones que no figuraban en ningún documento de acceso público:
+          laboratorios subterráneos, centros de prueba aislados, complejos que
+          respondían únicamente a estructuras de mando no reconocidas.
+        </p>
+
+        <div style="display: flex; gap: 8px; margin: 8px 0">
+          <span class="stamp secret">СЕКРЕТНО</span>
+          <div
+            style="
+              font-size: 10px;
+              color: var(--cream3);
+              align-self: center;
+              letter-spacing: 1px;
+            "
+          >
+            UBICACIÓN: <span class="censored">CENSURADO</span>
+          </div>
+        </div>
+
+        <p>
+          Los archivos recuperados de dichas instalaciones describen líneas de
+          investigación sin precedente documentado: manipulación del flujo
+          temporal, alteración gravitacional localizada, generación de portales
+          de carácter experimental, interacción con formas de materia y energía
+          sin categorización conocida. Los propósitos declarados internamente no
+          eran defensivos. Eran exploratorios, y algunos fragmentos sugieren
+          intenciones que van más allá de esa denominación.
+        </p>
+
+        <div class="file-section-title">SUJETOS DE PRUEBA</div>
+        <p>
+          Las pruebas no se circunscribieron a simulaciones. Se emplearon
+          sujetos reales: personal militar reasignado sin notificación,
+          prisioneros transferidos sin registro documental, civiles sin
+          expediente oficial. Los protocolos de seguridad y supervisión ética
+          eran inexistentes. Los resultados fueron inconsistentes: algunos
+          procedimientos fallaban de forma inmediata; otros generaban efectos
+          que los propios investigadores no disponían de lenguaje técnico para
+          describir.
+        </p>
+
+        <div class="lore-fragment">
+          "el sujeto permanece... pero no completamente"<br />
+          "la señal regresa antes de ser enviada"<br />
+          "el espacio no coincide con la ubicación registrada"
+          <div
+            style="
+              margin-top: 6px;
+              font-size: 10px;
+              letter-spacing: 2px;
+              color: var(--cream3);
+              opacity: 0.5;
+            "
+          >
+            — FRAGMENTO RECUPERADO · AUTOR: DESCONOCIDO · ESTADO: PARCIALMENTE
+            CORRUPTO
+          </div>
+        </div>
+
+        <div class="file-section-title">
+          OBJETOS ANÓMALOS — PRIMERA APARICIÓN
+        </div>
+        <p>
+          Durante el desarrollo de las pruebas comenzaron a registrarse objetos
+          con propiedades imposibles de clasificar. Algunos fueron producidos en
+          los propios laboratorios como resultado de los experimentos. Otros
+          sencillamente aparecieron, sin origen rastreable, sin figurar en
+          ningún inventario previo. Alteraban el entorno próximo, emitían
+          energía de manera irregular y su comportamiento no era reproducible
+          bajo condiciones idénticas. Los intentos de contenerlos o de
+          analizarlos de forma sistemática fracasaron de modo consistente.
+        </p>
+
+        <p>
+          A medida que el Estado continuaba su proceso de debilitamiento,
+          fragmentos de información comenzaron a filtrarse hacia circuitos
+          externos. Testimonios aislados. Registros incompletos. Ninguno fue
+          confirmado por ningún organismo oficial. Pero todos apuntaban en la
+          misma dirección: había proyectos activos que no debían seguir
+          estándolo.
+        </p>
+
+        <div class="lore-warning">
+          ⚠ ADVERTENCIA — REGISTRO I<br />
+          No existe confirmación de que la totalidad de los proyectos fuera
+          desactivada antes del 19/08/1991.<br />
+          Los archivos disponibles sugieren lo contrario.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTRO II -->
+  <div class="panel open" id="p-lore2">
+    <div class="panel-header" onclick="togglePanel('p-lore2')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">EVENTO-19/08/1991 · REG-II</span>
+        <span class="panel-title">EL EVENTO</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge max-secreto">CATASTRÓFICO</span>
+        <div class="status-dot inestable"></div>
+        <span class="status-text">DATOS DAÑADOS</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="integrity-bar">
+        <span class="integrity-label">INTEGRIDAD:</span>
+        <div class="integrity-track">
+          <div
+            class="integrity-fill"
+            style="
+              width: 43%;
+              background: linear-gradient(to right, var(--red), #cc6622);
+            "
+          ></div>
+        </div>
+        <span class="integrity-pct" style="color: var(--red3)">43%</span>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center; margin: 8px 0">
+        <span style="font-size: 9px; letter-spacing: 2px; color: var(--cream3)"
+          >FECHA:</span
+        >
+        <span style="font-family: var(--font-body); color: var(--gold)"
+          >19/08/1991 — 03:17:</span
+        >
+        <span
+          style="
+            font-family: var(--font-stamp);
+            color: var(--red3);
+            font-size: 11px;
+          "
+          >██</span
+        >
+      </div>
+      <div class="hr"></div>
+      <div class="file-content glitch-2">
+        <p>
+          No hubo una detonación. No existió una señal única que desencadenara
+          la secuencia. Lo que ocurrió en esa madrugada fue una superposición:
+          múltiples instalaciones registraron actividad simultánea dentro de un
+          margen de segundos, sin que ninguna de ellas hubiera recibido una
+          instrucción común. Los canales de comunicación fallaron. Un protocolo
+          sin denominación oficial se activó de manera autónoma. Y a partir de
+          ese momento, la cadena causal dejó de tener orden lineal.
+        </p>
+
+        <p>
+          Los sistemas de contención no cedieron todos a la vez ni bajo las
+          mismas condiciones. Lo que falló primero no fue la tecnología. Fue la
+          referencia. Los registros de ese intervalo describen instrumentos que
+          dejaron de corresponderse con su entorno, lecturas que no coincidían
+          con ninguna ubicación reconocible, y una puerta que nadie había
+          accionado y que, aparentemente, nunca había estado realmente cerrada.
+        </p>
+
+        <div class="lore-fragment">
+          "no estamos perdiendo el control... estamos perdiendo la
+          referencia"<br />
+          "la puerta no estaba cerrada"
+          <span class="data-error">>> DATO SIGUIENTE: IRRECUPERABLE</span>
+        </div>
+
+        <div class="file-section-title">LO QUE SE LIBERÓ</div>
+        <p>
+          Lo que se manifestó esa noche no fue ni una explosión ni una implosión
+          en el sentido convencional. Los registros visuales disponibles
+          muestran distorsión del espacio inmediato, fragmentación de
+          estructuras físicas, objetos que desaparecen de forma parcial mientras
+          el entorno que los rodeaba permanece intacto. No hubo expansión
+          observable. Hubo apertura.
+        </p>
+
+        <p>
+          El personal presente en el momento del Evento no falleció por causas
+          convencionales. Algunos desaparecieron sin registro. Otros
+          reaparecieron en ubicaciones distintas a las registradas, sin
+          explicación sobre el mecanismo de desplazamiento. Varios presentaron
+          deterioro físico sin causa directa identificable, pérdida parcial de
+          identidad, desorientación de carácter irreversible.
+        </p>
+
+        <div class="lore-fragment">
+          "El cuerpo sigue aquí... pero no completamente"
+        </div>
+
+        <div class="file-section-title">ESTABILIZACIÓN INCORRECTA</div>
+        <p>
+          Tras el Evento, el área afectada no colapsó. Se estabilizó de forma
+          anómala. Las alteraciones no se detuvieron ni se propagaron de golpe;
+          lo hicieron de manera gradual, irregular e impredecible. Gravedad
+          inconsistente. Desplazamientos sin trayectoria. Repetición de eventos.
+          Sonidos sin origen identificable. Portales inestables que conectaban
+          con ubicaciones descritas en los registros como
+          <em>"el mismo lugar, pero no en el mismo estado"</em>.
+        </p>
+
+        <p>
+          Los mapas dejaron de ser operativos. Las coordenadas dejaron de
+          coincidir con la realidad física. Se detectaron señales emitidas antes
+          del Evento, actividad en instalaciones ya destruidas, transmisiones
+          que se repetían sin fuente activa identificable.
+        </p>
+
+        <div class="lore-warning" style="letter-spacing: 1px">
+          // ERROR: PARADOJA DETECTADA<br />
+          // HIPÓTESIS VIGENTE: "INTERFERENCIA EN ESTRUCTURA BASE"<br />
+          // ORIGEN: DESCONOCIDO
+        </div>
+
+        <div class="file-section-title">CIERRE TOTAL DEL PERÍMETRO</div>
+        <p>
+          Una vez confirmada la naturaleza del fenómeno, el área fue designada
+          oficialmente como ZONA y sometida a cierre total del perímetro
+          exterior. La Zona opera de manera completamente separada del mundo
+          exterior. El acceso está prohibido sin autorización expresa, y se
+          ordena apertura de fuego sobre cualquier presencia sospechosa
+          detectada en las proximidades del muro. La salida igualmente está
+          vedada sin procedimiento establecido.
+        </p>
+
+        <span class="data-error">>> ERROR ACCEDIENDO A: PROYECTOS_ACTIVOS</span>
+        <span class="data-error">>> ACCESO DENEGADO — BLOQUEO EXTERNO</span>
+        <span class="data-error">>> FIRMA: [NO REGISTRADA]</span>
+
+        <div class="lore-warning">
+          ⚠ ADVERTENCIA — ARCHIVO MODIFICADO<br />
+          El contenido de este registro ha sido alterado por un usuario que no
+          figura en el directorio del sistema.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTRO III — LOCKED -->
+  <div class="panel" id="p-lore3">
+    <div class="panel-header" onclick="togglePanel('p-lore3')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">PROYECTOS-ACTIVOS · REG-III</span>
+        <span class="panel-title">PARTE III — ACCESO BLOQUEADO</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge max-secreto">BLOQUEO EXTERNO</span>
+        <div class="status-dot inestable"></div>
+        <span class="status-text">BLOQUEADO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="locked-section">
+        <div class="locked-icon">🔒</div>
+        <div class="locked-msg">
+          ACCESO DENEGADO — NIVEL AUTORIZACIÓN INSUFICIENTE
+        </div>
+        <div class="locked-sub">
+          Este registro requiere código de acceso especial · ЧАСТЬ III
+        </div>
+        <div class="access-input-row">
+          <input
+            class="access-input"
+            id="lore3-input"
+            placeholder="CÓDIGO DE ACCESO"
+            type="password"
+            autocomplete="off"
+          />
+          <button
+            class="access-btn"
+            onclick="unlockSection('lore3', 'lore3-input')"
+          >
+            VERIFICAR
+          </button>
+        </div>
+        <div
+          style="margin-top: 8px; font-size: 9px; color: var(--red3)"
+          id="lore3-msg"
+        ></div>
+      </div>
+      <div id="lore3-content" style="display: none">
+        <div class="file-content">
+          <div class="lore-warning">
+            // ARCHIVO PARCIALMENTE RECUPERADO — INTEGRIDAD: 17%
+          </div>
+          <span class="data-error"
+            >>> [FRAGMENTO 1/??] — DATOS ANTERIORES: IRRECUPERABLES</span
+          >
+          <div
+            class="lore-fragment"
+            style="font-family: var(--font-stamp); letter-spacing: 1px"
+          >
+            "...los sistemas siguen en funcionamiento..."<br />
+            "...no fue un accidente..."<br />
+            "...hay algo dentro que no entró con nosotros..."
+          </div>
+          <span class="data-error"
+            >>> ERROR DE LECTURA — SECTOR SIGUIENTE CORRUPTO</span
+          >
+          <div class="censored">SECCIÓN ELIMINADA — AUTORIZACIÓN REVOCADA</div>
+          <span class="data-error"
+            >>> ARCHIVO FINALIZADO POR INTERVENCIÓN EXTERNA</span
+          >
+          <span class="data-error"
+            >>> USUARIO: [NO REGISTRADO] · FIRMA: ████████</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+          <!-- ══ FACTIONS ══ -->
+<div class="section-page" id="page-factions">
+  <div class="section-header">
+    <div>
+      <div class="section-title-ru">РЕЕСТР ФРАКЦИЙ</div>
+      <div class="section-title">FACCIONES</div>
+    </div>
+    <div class="section-meta">
+      <div class="section-id">ZN-FAC-01→06 // ESTADO: ACTIVO</div>
+    </div>
+  </div>
+
+  <!-- DIREKTSIYA -->
+  <div class="panel" id="p-fac1">
+    <div class="panel-header" onclick="togglePanel('p-fac1')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-FAC-01 · RESTRINGIDO</span>
+        <span class="panel-title">DIREKTSIYA — ДИРЕКЦИЯ</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge restringido">RESTRINGIDO</span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ACTIVO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="faction-header">
+        <!-- DIREKTSIYA LOGO -->
+        <img class="faction-logo" src="images/factions/DIREKTSIYA.jpg" alt="Logo de Direktsiya" style="width: 64px; height: 64px; object-fit: contain; display: block" />
+        <div class="faction-name-block">
+          <div class="faction-name-ru">ДИРЕКЦИЯ</div>
+          <div class="faction-name-es">Directorio de Contención Zonal</div>
+          <div class="faction-influence">
+            <span class="influence-label">INFLUENCIA</span>
+            <div class="influence-bars">
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+            </div>
+            <span
+              style="
+                font-size: 9px;
+                color: var(--gold3);
+                margin-left: 4px;
+                letter-spacing: 1px;
+              "
+              >ALTA</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="file-content">
+        <p>
+          Semanas después del 19/08/1991, desde Moscú se tomó una decisión que
+          nunca fue comunicada al público. El perímetro de la ciudad y sus zonas
+          adyacentes fue sellado. No como medida provisional, sino como
+          protocolo de duración indefinida ante un fenómeno sin precedente
+          operativo y sin clasificación vigente.
+        </p>
+        <p>
+          La Direktsiya es el instrumento ejecutor de ese cierre. No surgió como
+          una unidad de nueva creación; fue reconfigura a partir de estructuras
+          militares preexistentes, redirigidas al perímetro con un mandato
+          concreto: contener la expansión, supervisar el acceso, neutralizar
+          amenazas internas. Sin margen para la interpretación libre. Sin
+          espacio para la incertidumbre.
+        </p>
+        <div class="file-section-title">OPERACIONES</div>
+        <p>
+          Operan con cadena de mando vigente y logística funcional. Puestos de
+          control en vías de acceso, unidades desplegadas por sectores, zonas
+          seguras establecidas en puntos estratégicos. Todo desplazamiento
+          dentro del perímetro queda registrado. Todo incidente queda
+          consignado. La maquinaria burocrática militar sigue en marcha aunque
+          el entorno que rodea sus posiciones carezca de explicación racional.
+        </p>
+        <p>
+          La Zona es tratada como un fenómeno físico de origen desconocido. Eso
+          es todo lo que la Direktsiya necesita para operar. No investigan su
+          naturaleza ni contemplan explicaciones que no puedan medirse o
+          acotarse. Lo que no se comprende, se delimita. Lo que no puede
+          delimitarse, se neutraliza.
+        </p>
+        <div class="file-section-title">RELACIONES CON OTRAS FACCIONES</div>
+        <p>
+          Su relación con el resto de facciones es de autoridad unilateral. No
+          negocian presencia no autorizada. No toleran actividad que interfiera
+          con el perímetro o con sus operaciones internas. La coordinación con
+          el Otdel Nauki existe, pero es tensa y está condicionada únicamente
+          por los términos que la Direktsiya impone.
+        </p>
+        <ul class="file-list">
+          <li>Estructura militar estándar con cadena de mando operativa</li>
+          <li>
+            Presencia permanente en perímetro exterior y sectores internos
+          </li>
+          <li>Registro sistemático de toda actividad dentro de la Zona</li>
+          <li>Intervención directa ante presencia o actividad no autorizada</li>
+          <li>
+            Tolerancia mínima frente a facciones no reconocidas oficialmente
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- VEKTOR -->
+  <div class="panel" id="p-fac2">
+    <div class="panel-header" onclick="togglePanel('p-fac2')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-FAC-02 · RESTRINGIDO</span>
+        <span class="panel-title">VEKTOR — ВЕКТОР</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge restringido">RESTRINGIDO</span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ACTIVO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="faction-header">
+        <img class="faction-logo" src="images/factions/VEKTOR.jpg" alt="Logo de Vektor" style="width: 64px; height: 64px; object-fit: contain; display: block" />
+        <div class="faction-name-block">
+          <div class="faction-name-ru">ВЕКТОР</div>
+          <div class="faction-name-es">
+            Círculo de Observadores Independientes
+          </div>
+          <div class="faction-influence">
+            <span class="influence-label">INFLUENCIA</span>
+            <div class="influence-bars">
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar"></div>
+              <div class="influence-bar"></div>
+            </div>
+            <span
+              style="
+                font-size: 9px;
+                color: var(--gold3);
+                margin-left: 4px;
+                letter-spacing: 1px;
+              "
+              >VARIABLE</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="file-content">
+        <p>
+          No llegaron a la Zona con un propósito definido. Cada uno llegó por
+          separado, en momentos distintos, por razones que ninguno comparte con
+          facilidad. Lo que los cohesiona no es una ideología ni una estructura
+          de mando. Es el tiempo suficiente dentro del perímetro como para haber
+          comprendido algo que ninguna otra facción parece estar dispuesta a
+          aceptar.
+        </p>
+        <p>
+          La Zona tiene una lógica propia. No es aleatoria. No es caótica en el
+          sentido que otros asumen. Tiene patrones. Regularidades que no
+          corresponden a la física convencional, pero que se repiten con
+          consistencia suficiente como para ser interpretadas. El Vektor lleva
+          tiempo leyéndolas.
+        </p>
+        <div class="file-section-title">CAPACIDADES DOCUMENTADAS</div>
+        <p>
+          Corrientes de aire que se modifican antes de que una anomalía se
+          active. Variaciones de presión que indican inestabilidad en sectores
+          concretos. Alteraciones perceptibles en el entorno que funcionan como
+          advertencia para quienes saben leerlas. Para el Vektor, son datos.
+          Para el resto, son ruido de fondo.
+        </p>
+        <p>
+          Se han documentado casos de miembros que anticipan la manifestación de
+          anomalías antes de que sean detectables por cualquier instrumento
+          disponible. Que atraviesan zonas marcadas como inestables sin
+          incidentes registrados. Que aparecen en ubicaciones sin rutas de
+          acceso identificadas. No se ha determinado si esto obedece a
+          experiencia acumulada, a una capacidad perceptiva desarrollada por
+          exposición prolongada, o a algo que esa misma exposición produjo en
+          ellos.
+        </p>
+        <ul class="file-list">
+          <li>Sin jerarquía formal ni estructura organizativa visible</li>
+          <li>
+            Desplazamiento basado en lectura directa del entorno, no en
+            cartografía
+          </li>
+          <li>
+            Uso activo de anomalías como cobertura, barrera o vía de tránsito
+          </li>
+          <li>Hostiles ante cualquier intento de control externo</li>
+          <li>Prácticamente imposibles de rastrear de forma continua</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PEREDEL -->
+  <div class="panel" id="p-fac3">
+    <div class="panel-header" onclick="togglePanel('p-fac3')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-FAC-03 · RESTRINGIDO</span>
+        <span class="panel-title">PEREDEL — ПЕРЕДЕЛ</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge restringido">RESTRINGIDO</span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ACTIVO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="faction-header">
+        <img class="faction-logo" src="images/factions/PEREDEL.jpg" alt="Logo de Peredel" style="width: 64px; height: 64px; object-fit: contain; display: block" />
+        <div class="faction-name-block">
+          <div class="faction-name-ru">ПЕРЕДЕЛ</div>
+          <div class="faction-name-es">Red de Exploradores y Comerciantes</div>
+          <div class="faction-influence">
+            <span class="influence-label">INFLUENCIA</span>
+            <div class="influence-bars">
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar"></div>
+              <div class="influence-bar"></div>
+            </div>
+            <span
+              style="
+                font-size: 9px;
+                color: var(--gold3);
+                margin-left: 4px;
+                letter-spacing: 1px;
+              "
+              >VARIABLE</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="file-content">
+        <p>
+          Después del Evento, la Zona quedó repleta de objetos que el mundo
+          exterior todavía no tiene forma de nombrar. Equipamiento abandonado en
+          instalaciones que nunca tuvieron un cierre formal. Suministros en
+          edificios que llevan meses sin personal. Información que alguien, en
+          algún lugar, pagaría por obtener. El Peredel existe porque hay
+          demanda.
+        </p>
+        <p>
+          No es una organización. No tiene liderazgo central ni estructura
+          reconocible. Es una red informal de individuos y grupos reducidos que
+          operan dentro del perímetro con un objetivo que varía pero se mantiene
+          constante en su lógica: entrar, obtener lo que sea posible, salir. O
+          al menos intentarlo.
+        </p>
+        <div class="file-section-title">COMPOSICIÓN Y OPERATIVA</div>
+        <p>
+          Su composición es fluida. Hay comerciantes que intercambian objetos y
+          suministros entre facciones o con contactos fuera del perímetro. Hay
+          saqueadores que trabajan solos y no preguntan sobre el origen de lo
+          que encuentran. Hay exploradores que cartografían sectores
+          desconocidos por encargo o por cuenta propia. Hay informantes que
+          venden lo que saben al primero que pague. Ninguno responde al otro.
+        </p>
+        <div class="lore-warning" style="font-size: 9px">
+          ⚠ ÍNDICE DE DESAPARICIÓN: MÁS ALTO REGISTRADO EN LA ZONA — ROTACIÓN
+          CONSTANTE
+        </div>
+        <ul class="file-list">
+          <li>Red informal sin jerarquía ni estructura centralizada</li>
+          <li>Alta rotación de miembros por desapariciones frecuentes</li>
+          <li>
+            Conocimiento del terreno superior al de cualquier otra facción
+          </li>
+          <li>
+            Sin alianzas permanentes — cooperación o conflicto según contexto
+          </li>
+          <li>
+            Fuente primaria de suministros e información para quien pueda pagar
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- IZLOM -->
+  <div class="panel" id="p-fac4">
+    <div class="panel-header" onclick="togglePanel('p-fac4')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-FAC-04 · RESTRINGIDO</span>
+        <span class="panel-title">IZLOM — ИЗЛОМ</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge restringido">RESTRINGIDO</span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ACTIVO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="faction-header">
+        <img class="faction-logo" src="images/factions/IZLOM.jpg" alt="Logo de Izlom" style="width: 64px; height: 64px; object-fit: contain; display: block" />
+        <div class="faction-name-block">
+          <div class="faction-name-ru">ИЗЛОМ</div>
+          <div class="faction-name-es">Afectados por Exposición Prolongada</div>
+          <div class="faction-influence">
+            <span class="influence-label">INFLUENCIA</span>
+            <div class="influence-bars">
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar"></div>
+              <div class="influence-bar"></div>
+              <div class="influence-bar"></div>
+              <div class="influence-bar"></div>
+            </div>
+            <span
+              style="
+                font-size: 9px;
+                color: var(--cream3);
+                margin-left: 4px;
+                letter-spacing: 1px;
+              "
+              >BAJA</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="file-content">
+        <p>
+          No existe un momento preciso en que alguien decide convertirse en
+          Izlom. Hay un proceso. Gradual. Irreversible. Y cuando el resto lo
+          percibe, el punto de retorno ya ha quedado atrás.
+        </p>
+        <p>
+          El Izlom no es una facción en el sentido convencional. No tiene
+          fundadores, ni doctrina, ni objetivos colectivos. Es la denominación
+          que las demás facciones usan para referirse a quienes la exposición
+          prolongada a la Zona transformó más allá del umbral en que el
+          organismo puede recuperarse por sí solo.
+        </p>
+        <div class="file-section-title">NATURALEZA DE LAS MODIFICACIONES</div>
+        <p>
+          Mutaciones progresivas. Disfunciones orgánicas recurrentes.
+          Enfermedades sin categoría conocida. Inestabilidad neurológica que se
+          manifiesta de formas distintas en cada caso. Algunos perdieron la
+          capacidad de procesar el entorno de forma convencional. Otros
+          simplemente dejaron de asemejarse a lo que eran antes de entrar al
+          perímetro.
+        </p>
+        <p>
+          Frente a eso, algunos optaron por adaptarse con los medios
+          disponibles: metal integrado al cuerpo para reemplazar lo que había
+          fallado, piezas mecánicas utilizadas como extensiones físicas,
+          modificaciones improvisadas orientadas a mantener la funcionalidad
+          cuando el tejido orgánico propio ya no era suficiente. No fue una
+          elección estética. Fue necesidad.
+        </p>
+        <ul class="file-list">
+          <li>Alteraciones físicas severas, progresivas e irreversibles</li>
+          <li>Agrupación ocasional sin estructura ni objetivo compartido</li>
+          <li>Presencia en zonas marginales e inestables del perímetro</li>
+          <li>Comportamiento ante contacto externo: impredecible</li>
+          <li>Sin registro de reversión — esperanza de vida no calculable</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ТЕНЬ - LOCKED -->
+  <div class="panel" id="p-fac5">
+    <div class="panel-header" onclick="togglePanel('p-fac5')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id"
+          >ZN-FAC-05 · SECRETO — NO VERIFICADO</span
+        >
+        <span class="panel-title">ТЕНЬ — ENTIDAD NO REGISTRADA</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge no-verificado">NO VERIFICADO</span>
+        <div class="status-dot corrupto"></div>
+        <span class="status-text">INCIERTO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="faction-header">
+        <img class="faction-logo" src="images/factions/TEHB.jpg" alt="Logo de Тень" style="width: 64px; height: 64px; object-fit: contain; display: block" />
+        <div class="faction-name-block">
+          <div class="faction-name-ru" style="color: var(--cream3)">
+            Т Е Н Ь
+          </div>
+          <div class="faction-name-es">
+            Entidad No Registrada — Existencia no confirmada
+          </div>
+          <div class="faction-influence">
+            <span class="influence-label">INFLUENCIA</span>
+            <div style="font-size: 10px; letter-spacing: 2px; color: #555">
+              NO DETERMINADO
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="file-content">
+        <p>
+          No figura en ningún archivo estatal. No aparece en la documentación
+          vinculada a los proyectos previos al Evento. No ha establecido
+          contacto directo con ninguna facción conocida. No existe registro de
+          su fundación, composición o estructura interna.
+        </p>
+        <p>Y sin embargo, su nombre aparece.</p>
+        <p>
+          Aparece en fragmentos de registros procedentes de fuentes distintas,
+          en momentos diferentes, sin coordinación aparente entre ellos.
+          Testimonios indirectos que describen individuos o grupos reducidos que
+          permanecen en una ubicación durante períodos muy breves antes de
+          desaparecer, siempre antes de que cualquier seguimiento pueda
+          establecerse.
+        </p>
+
+        <div class="locked-section" style="margin-top: 12px">
+          <div class="locked-icon">⚠</div>
+          <div class="locked-msg">DATOS ADICIONALES — ACCESO RESTRINGIDO</div>
+          <div class="locked-sub">
+            Información sobre capacidades atribuidas y origen de la facción
+          </div>
+          <div class="access-input-row">
+            <input
+              class="access-input"
+              id="fac5-input"
+              placeholder="CÓDIGO NIVEL-4"
+              type="password"
+              autocomplete="off"
+            />
+            <button
+              class="access-btn"
+              onclick="unlockSection('fac5', 'fac5-input')"
+            >
+              VERIFICAR
+            </button>
+          </div>
+          <div
+            style="margin-top: 8px; font-size: 9px; color: var(--red3)"
+            id="fac5-msg"
+          ></div>
+        </div>
+        <div id="fac5-content" style="display: none">
+          <div class="hr"></div>
+          <div class="file-section-title">CAPACIDADES ATRIBUIDAS</div>
+          <p>
+            Se les atribuye acceso a objetos anómalos estables, sin los efectos
+            irregulares que estos presentan normalmente. Conocimiento previo de
+            anomalías activas antes de que sean detectables por medios
+            convencionales. Capacidad de desplazamiento dentro de la Zona sin
+            activar eventos registrables por otras facciones ni por los propios
+            sistemas de la Direktsiya.
+          </p>
+          <div class="file-section-title">HIPÓTESIS SOBRE ORIGEN</div>
+          <p>
+            Los fragmentos disponibles sugieren que ciertos miembros de la Тень
+            tuvieron acceso a instalaciones o proyectos antes del colapso. Que
+            conocían, con distintos grados de detalle, los resultados posibles
+            de lo que se estaba desarrollando. Que el 19/08/1991 no los tomó por
+            sorpresa.
+          </p>
+          <div class="censored">CONFIRMACIÓN DIRECTA: INEXISTENTE</div>
+          <ul class="file-list">
+            <li>Existencia no confirmada oficialmente por ningún organismo</li>
+            <li>
+              Sin estructura, territorio ni objetivos operativos identificables
+            </li>
+            <li>
+              Efectos indirectos registrados — presencia directa: nunca
+              confirmada
+            </li>
+            <li>Ninguna facción ha establecido contacto verificable</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTDEL NAUKI -->
+  <div class="panel" id="p-fac6">
+    <div class="panel-header" onclick="togglePanel('p-fac6')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-FAC-06 · RESTRINGIDO</span>
+        <span class="panel-title">OTDEL NAUKI — ОТДЕЛ НАУКИ</span>
+      </div>
+      <div class="panel-status">
+        <span class="panel-class-badge restringido">RESTRINGIDO</span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ACTIVO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="faction-header">
+        <img class="faction-logo" src="images/factions/OTDEL NAUKI.jpg" alt="Logo de Otdel Nauki" style="width: 64px; height: 64px; object-fit: contain; display: block" />
+        <div class="faction-name-block">
+          <div class="faction-name-ru">ОТДЕЛ НАУКИ</div>
+          <div class="faction-name-es">Unidad Científica Independiente</div>
+          <div class="faction-influence">
+            <span class="influence-label">INFLUENCIA</span>
+            <div class="influence-bars">
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar fill"></div>
+              <div class="influence-bar"></div>
+              <div class="influence-bar"></div>
+            </div>
+            <span
+              style="
+                font-size: 9px;
+                color: var(--gold3);
+                margin-left: 4px;
+                letter-spacing: 1px;
+              "
+              >MEDIA</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="file-content">
+        <p>
+          El Evento no produjo únicamente anomalías. Generó preguntas que nadie
+          con acceso a los recursos adecuados ha podido responder. El Otdel
+          Nauki lleva meses intentándolo con lo que tiene disponible, que no es
+          mucho.
+        </p>
+        <p>
+          No son una institución estatal. No responden a Moscú ni a ningún
+          organismo con presencia fuera del perímetro. Son lo que quedó cuando
+          el sistema colapsó y algunos de los que trabajaban dentro de él
+          decidieron no marcharse, o simplemente no pudieron hacerlo.
+        </p>
+        <div class="file-section-title">COMPOSICIÓN</div>
+        <p>
+          Científicos. Técnicos. Investigadores. Personas que se encontraban en
+          instalaciones próximas al Evento cuando ocurrió, o que entraron
+          después con el objetivo de comprender qué había sucedido y no
+          encontraron la salida antes de que el perímetro se cerrara. Algunos
+          eligieron quedarse. La diferencia entre ambos grupos importa menos de
+          lo que parece cuando el trabajo a realizar es el mismo.
+        </p>
+        <div class="file-section-title">RELACIONES INTERFACCIONALES</div>
+        <p>
+          Su relación con la Direktsiya es funcional pero tensa. La Direktsiya
+          necesita información que solo el Otdel Nauki puede generar. El Otdel
+          Nauki necesita protección y suministros que solo la Direktsiya
+          distribuye. Ninguno confía completamente en el otro. Ambos lo saben y
+          operan dentro de ese límite sin resolverlo.
+        </p>
+        <ul class="file-list">
+          <li>
+            Asentamiento fijo en instalaciones recuperadas dentro del perímetro
+          </li>
+          <li>Documentación sistemática de anomalías y patrones</li>
+          <li>Intercambio de información por suministros o protección</li>
+          <li>Relación tensa pero operativa con la Direktsiya</li>
+          <li>Objetivo central: comprender la naturaleza del Evento</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+          <!-- ══ ENTITIES ══ -->
+<div class="section-page" id="page-entities">
+  <div class="section-header">
+    <div>
+      <div class="section-title-ru">РЕЕСТР СУЩНОСТЕЙ</div>
+      <div class="section-title">ENTIDADES</div>
+    </div>
+    <div class="section-meta">
+      <div class="section-id">ZN-ENT // 8 REGISTROS ACTIVOS</div>
+    </div>
+  </div>
+
+  <!-- MUTANTES -->
+  <div class="panel" id="pe-mut">
+    <div class="panel-header" onclick="togglePanel('pe-mut')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-ENT-G01 · SECRETO</span>
+        <span class="panel-title">MUTANTES</span>
+      </div>
+      <div class="panel-status">
+        <span class="threat-badge alto" style="padding: 2px 8px; font-size: 9px"
+          >ALTO</span
+        >
+        <div class="status-dot estable"></div>
+        <span class="status-text">ESTABLE</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+
+    <div class="panel-body">
+      <div class="entity-header">
+        <img
+          src="images/entities/MUTANTES.jpg"
+          alt="Emblema Mutantes"
+          style="
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            image-rendering: auto;
+            display: block;
+          "
+        />
+
+        <div>
+          <div
+            style="
+              font-family: var(--font-title);
+              font-size: 14px;
+              letter-spacing: 2px;
+              color: var(--cream);
+            "
+          >
+            MUTANTES
+          </div>
+          <div
+            style="font-size: 10px; color: var(--cream3); letter-spacing: 1px"
+          >
+            Individuos humanos alterados por radiación y fenómenos anómalos
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 6px">
+            <span class="stamp secret" style="font-size: 8px">СЕКРЕТНО</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-content">
+        <p>
+          Los mutantes conservan una base humanoide, pero presentan
+          deformaciones severas tanto en la superficie como en el funcionamiento
+          interno. Las alteraciones registradas incluyen crecimiento anormal de
+          hueso y tejido, distorsión de extremidades, deformación craneal y
+          facial, y el desarrollo de estructuras sin identificación posible. La
+          apariencia varía entre sujetos; no existen dos casos documentados
+          idénticos.
+        </p>
+
+        <div class="file-section-title">ESTADO BIOLÓGICO</div>
+        <p>
+          El cuerpo permanece funcional. No se considera muerte clínica. Sin
+          embargo, los procesos fisiológicos normales están alterados o
+          reemplazados por mecanismos de origen desconocido. Se desconoce hasta
+          qué punto el individuo original permanece consciente de alguna forma.
+        </p>
+
+        <div class="lore-fragment">
+          [ POSIBLE ACTIVIDAD COGNITIVA RESIDUAL — NO CONFIRMADA ]
+        </div>
+
+        <div class="file-section-title">COMPORTAMIENTO</div>
+        <ul class="file-list">
+          <li>Agresividad marcada en la mayoría de los casos registrados</li>
+          <li>Respuesta activa a estímulos visuales y de movimiento</li>
+          <li>Tendencia a aproximarse a estructuras habitadas</li>
+          <li>
+            Algunos muestran persistencia en objetivos — comportamiento no
+            completamente instintivo
+          </li>
+        </ul>
+
+        <p>
+          La transformación no es instantánea. Se produce de forma progresiva
+          tras exposición prolongada. No se ha registrado ningún caso de
+          reversión.
+        </p>
+
+        <div class="censored">INFORMACIÓN ADICIONAL: CENSURADA</div>
+
+        <div class="threat-level">
+          <span class="threat-badge alto">AMENAZA: ALTO</span>
+        </div>
+
+        <div class="file-section-title">PROTOCOLO</div>
+        <ul class="file-list">
+          <li>Evitar contacto directo bajo cualquier circunstancia</li>
+          <li>No permitir aproximación a zonas seguras establecidas</li>
+          <li>Neutralización autorizada en situaciones de riesgo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUESPEDES -->
+  <div class="panel" id="pe-hues">
+    <div class="panel-header" onclick="togglePanel('pe-hues')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-ENT-G02 · SECRETO</span>
+        <span class="panel-title">HUÉSPEDES PARASITADOS</span>
+      </div>
+
+      <div class="panel-status">
+        <span
+          class="threat-badge medio"
+          style="padding: 2px 8px; font-size: 9px"
+        >
+          MEDIO-VAR
+        </span>
+        <div class="status-dot corrupto"></div>
+        <span class="status-text">CORRUPTO</span>
+      </div>
+
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+
+    <div class="panel-body">
+      <div class="entity-header">
+        <img
+          src="images/entities/HUÉSPEDES PARASITADOS.jpg"
+          alt="Emblema Huéspedes"
+          style="
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            image-rendering: auto;
+            display: block;
+          "
+        />
+
+        <div>
+          <div
+            style="
+              font-family: var(--font-title);
+              font-size: 14px;
+              letter-spacing: 2px;
+              color: var(--cream);
+            "
+          >
+            HUÉSPEDES PARASITADOS
+          </div>
+
+          <div
+            style="font-size: 10px; color: var(--cream3); letter-spacing: 1px"
+          >
+            Cadáveres humanos reactivados por agentes externos desconocidos
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px">
+            <span class="stamp secret" style="font-size: 8px">СЕКРЕТНО</span>
+            <span class="stamp warning" style="font-size: 8px">CORRUPTO</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-content">
+        <p>
+          Cuerpos humanos sin actividad vital autónoma que presentan
+          descomposición parcial o avanzada. El movimiento observado no
+          corresponde a funciones biológicas normales y es inducido por un
+          agente externo no completamente identificado.
+        </p>
+
+        <div class="file-section-title">AGENTE CONTROLADOR</div>
+        <p>
+          Se presume la existencia de una entidad parasitaria que utiliza el
+          sistema nervioso residual como interfaz. Este agente controla la
+          actividad motora básica y el desplazamiento. No siempre es visible ni
+          detectable.
+        </p>
+
+        <div class="censored">IDENTIFICACIÓN DEL AGENTE: CENSURADA</div>
+
+        <div class="file-section-title">COMPORTAMIENTO</div>
+        <ul class="file-list">
+          <li>Desplazamiento lento, irregular y mecánico</li>
+          <li>Atracción hacia organismos vivos</li>
+          <li>Intentos de acceso a estructuras cerradas</li>
+          <li>Ausencia total de respuesta al dolor</li>
+        </ul>
+
+        <p>
+          El daño físico severo no garantiza la neutralización. Se ha registrado
+          actividad persistente incluso tras pérdida significativa de integridad
+          estructural.
+        </p>
+
+        <div class="lore-fragment">
+          [ ACTIVIDAD POST-MORTEM SOSTENIDA — ORIGEN DESCONOCIDO ]
+        </div>
+
+        <span class="data-error">>> ERROR: SECCIÓN FINAL — ILEGIBLE</span>
+        <span class="data-error">>> PROTOCOLO ███ — DATOS INCOMPLETOS</span>
+
+        <div class="threat-level">
+          <span class="threat-badge medio"> AMENAZA: MEDIO — VARIABLE </span>
+        </div>
+
+        <div class="file-section-title">PROTOCOLO</div>
+        <ul class="file-list">
+          <li>Evitar contacto directo</li>
+          <li>No permitir ingreso a zonas seguras</li>
+          <li>Neutralización solo si es estrictamente necesario</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTIDADES MAYORES -->
+  <div class="panel" id="pe-mayor">
+    <div class="panel-header" onclick="togglePanel('pe-mayor')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-ENT-G03 · SUPRA-SECRETO</span>
+        <span class="panel-title">ENTIDADES MAYORES</span>
+      </div>
+
+      <div class="panel-status">
+        <span
+          class="threat-badge critico"
+          style="padding: 2px 8px; font-size: 9px"
+        >
+          CRÍTICO
+        </span>
+        <div class="status-dot inestable"></div>
+        <span class="status-text">INESTABLE</span>
+      </div>
+
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+
+    <div class="panel-body">
+      <div class="entity-header">
+        <img
+          src="images/entities/ENTIDADES MAYORES.jpg"
+          alt="Emblema Entidades Mayores"
+          style="
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            image-rendering: auto;
+            display: block;
+          "
+        />
+
+        <div>
+          <div
+            style="
+              font-family: var(--font-title);
+              font-size: 14px;
+              letter-spacing: 2px;
+              color: var(--red3);
+            "
+          >
+            ENTIDADES MAYORES
+          </div>
+
+          <div
+            style="font-size: 10px; color: var(--cream3); letter-spacing: 1px"
+          >
+            Fenómenos de escala masiva — no clasificables como organismos
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px">
+            <span class="stamp secret" style="font-size: 8px"
+              >СВЕРХСЕКРЕТНО</span
+            >
+            <span class="stamp warning" style="font-size: 8px">INESTABLE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-content">
+        <p>
+          Presencias de gran magnitud que se manifiestan de forma irregular
+          dentro del perímetro. No responden a patrones biológicos conocidos. Su
+          forma, estructura y comportamiento son inconsistentes o directamente
+          imposibles bajo condiciones físicas normales.
+        </p>
+
+        <p>
+          Algunas manifestaciones presentan aparente solidez; otras parecen
+          incompletas o parcialmente fuera de fase. No existe una morfología
+          estándar. Cada registro difiere completamente del anterior.
+        </p>
+
+        <div class="file-section-title">EFECTOS EN EL ENTORNO</div>
+        <ul class="file-list">
+          <li>Alteraciones gravitacionales localizadas</li>
+          <li>Distorsión visual y geométrica del espacio</li>
+          <li>Fallos de percepción (profundidad, distancia)</li>
+          <li>Interferencia en sistemas electrónicos y ópticos</li>
+        </ul>
+
+        <p>
+          Se han identificado zonas donde la realidad permanece alterada incluso
+          tras la desaparición de la entidad.
+        </p>
+
+        <div class="censored">REGISTROS ADICIONALES: CENSURADOS</div>
+
+        <div class="file-section-title">INTERACCIÓN CON HUMANOS</div>
+        <p>
+          No se ha confirmado intención consciente. Sin embargo, los encuentros
+          han resultado en desapariciones, desintegración parcial o total, y
+          pérdida de coherencia cognitiva. Algunos sujetos reportan la sensación
+          de haber sido observados.
+        </p>
+
+        <div class="lore-fragment" style="color: var(--red3)">
+          No pueden ser contenidas.<br />
+          No pueden ser neutralizadas.<br />
+          No pueden ser comprendidas completamente.
+        </div>
+
+        <span class="data-error"
+          >>> ERROR: REGISTROS POSTERIORES — IRRECUPERABLES</span
+        >
+
+        <div class="threat-level">
+          <span class="threat-badge critico">AMENAZA: CRÍTICO</span>
+        </div>
+
+        <div class="file-section-title">PROTOCOLO</div>
+        <ul class="file-list">
+          <li>No establecer contacto visual prolongado</li>
+          <li>Evacuación inmediata del área de manifestación</li>
+          <li>No intentar registro directo sin autorización</li>
+        </ul>
+
+        <div class="lore-warning">
+          ⚠ NO TODAS LAS ENTIDADES MAYORES SON DETECTABLES POR MEDIOS
+          CONVENCIONALES
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARROÑEROS -->
+  <div class="panel" id="pe-carr">
+    <div class="panel-header" onclick="togglePanel('pe-carr')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-ENT-L04 · RESTRINGIDO</span>
+        <span class="panel-title">CARROÑEROS</span>
+      </div>
+
+      <div class="panel-status">
+        <span
+          class="threat-badge bajo"
+          style="padding: 2px 8px; font-size: 9px"
+        >
+          BAJO
+        </span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ESTABLE</span>
+      </div>
+
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+
+    <div class="panel-body">
+      <div class="entity-header">
+        <img
+          src="images/entities/CARROÑEROS.jpg"
+          alt="Emblema Carroñeros"
+          style="width: 64px; height: 64px; object-fit: contain; display: block"
+        />
+
+        <div>
+          <div
+            style="
+              font-family: var(--font-title);
+              font-size: 14px;
+              letter-spacing: 2px;
+              color: var(--cream);
+            "
+          >
+            CARROÑEROS
+          </div>
+
+          <div
+            style="font-size: 10px; color: var(--cream3); letter-spacing: 1px"
+          >
+            Organismos oportunistas adaptados al consumo post-mortem
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px">
+            <span class="stamp restricted" style="font-size: 8px"
+              >RESTRINGIDO</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="file-content">
+        <p>
+          Criaturas de tamaño medio con rasgos animales deformados. Presentan
+          estructuras corporales adaptadas al desgarro y consumo de materia
+          orgánica en descomposición.
+        </p>
+
+        <div class="file-section-title">COMPORTAMIENTO</div>
+        <ul class="file-list">
+          <li>Evitan confrontación directa</li>
+          <li>Operan en grupos reducidos</li>
+          <li>Mantienen distancia de amenazas mayores</li>
+          <li>Se activan ante inmovilidad prolongada</li>
+        </ul>
+
+        <div class="file-section-title">INDICADORES</div>
+        <p>
+          Su presencia sugiere muerte reciente o baja actividad de depredadores
+          superiores en la zona.
+        </p>
+
+        <div class="lore-fragment">
+          [ FUNCIÓN ECOLÓGICA: LIMPIEZA DEL PERÍMETRO ]
+        </div>
+
+        <div class="threat-level">
+          <span class="threat-badge bajo">AMENAZA: BAJO</span>
+          <span style="font-size: 10px; color: var(--cream3); margin-left: 8px">
+            (Aumenta si el sujeto está incapacitado)
+          </span>
+        </div>
+
+        <div class="file-section-title">PROTOCOLO</div>
+        <ul class="file-list">
+          <li>No simular inmovilidad prolongada</li>
+          <li>Evitar quedar aislado o herido</li>
+          <li>Dispersión suficiente para neutralización</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOMBRAS ANIMADAS -->
+  <div class="panel" id="pe-somb">
+    <div class="panel-header" onclick="togglePanel('pe-somb')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-ENT-G04 · SECRETO</span>
+        <span class="panel-title">SOMBRAS ANIMADAS</span>
+      </div>
+
+      <div class="panel-status">
+        <span
+          class="threat-badge desconocido"
+          style="padding: 2px 8px; font-size: 9px"
+        >
+          DESCONOCIDO
+        </span>
+        <div class="status-dot inestable"></div>
+        <span class="status-text">INESTABLE</span>
+      </div>
+
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+
+    <div class="panel-body">
+      <div class="entity-header">
+        <img
+          src="images/entities/SOMBRAS ANIMADAS.jpg"
+          alt="Emblema Sombras"
+          style="width: 64px; height: 64px; object-fit: contain; display: block"
+        />
+
+        <div>
+          <div
+            style="
+              font-family: var(--font-title);
+              font-size: 14px;
+              letter-spacing: 2px;
+              color: var(--cream);
+            "
+          >
+            SOMBRAS ANIMADAS
+          </div>
+
+          <div
+            style="font-size: 10px; color: var(--cream3); letter-spacing: 1px"
+          >
+            Manifestaciones anómalas sin forma física estable
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px">
+            <span class="stamp secret" style="font-size: 8px">СЕКРЕТНО</span>
+            <span class="stamp warning" style="font-size: 8px">INESTABLE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-content">
+        <p>
+          Presencias oscuras que se adhieren a superficies. No proyectan sombra:
+          son la sombra. Su forma cambia constantemente, sin mantener una
+          geometría definida.
+        </p>
+
+        <div class="file-section-title">EFECTOS REPORTADOS</div>
+        <ul class="file-list">
+          <li>Sensación persistente de observación</li>
+          <li>Distorsión temporal durante exposición</li>
+          <li>Pérdida de enfoque visual progresiva</li>
+        </ul>
+
+        <div class="file-section-title">INTERACCIÓN</div>
+        <p>
+          No siempre atacan directamente. Se han registrado desapariciones en
+          espacios cerrados, pérdida de memoria y alteraciones conductuales
+          severas.
+        </p>
+
+        <div class="censored">REGISTROS COMPLETOS: CENSURADOS</div>
+
+        <div class="lore-fragment">
+          [ PRESENCIA DETECTADA SIN FUENTE DE LUZ ASOCIADA ]
+        </div>
+
+        <div class="threat-level">
+          <span class="threat-badge desconocido">AMENAZA: DESCONOCIDO</span>
+        </div>
+
+        <div class="file-section-title">PROTOCOLO</div>
+        <ul class="file-list">
+          <li>Evitar contacto visual prolongado</li>
+          <li>No permanecer en espacios cerrados</li>
+          <li>Abandonar el área ante movimiento anómalo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAUNA ALTERADA -->
+  <div class="panel" id="pe-fauna">
+    <div class="panel-header" onclick="togglePanel('pe-fauna')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-ENT-G06 · SECRETO</span>
+        <span class="panel-title">FAUNA ALTERADA</span>
+      </div>
+
+      <div class="panel-status">
+        <span
+          class="threat-badge medio"
+          style="padding: 2px 8px; font-size: 9px"
+        >
+          MEDIO
+        </span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ESTABLE</span>
+      </div>
+
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+
+    <div class="panel-body">
+      <div class="entity-header">
+        <img
+          src="images/entities/FAUNA ALTERADA.jpg"
+          alt="Emblema Fauna Alterada"
+          style="width: 64px; height: 64px; object-fit: contain; display: block"
+        />
+
+        <div>
+          <div
+            style="
+              font-family: var(--font-title);
+              font-size: 14px;
+              letter-spacing: 2px;
+              color: var(--cream);
+            "
+          >
+            FAUNA ALTERADA
+          </div>
+
+          <div
+            style="font-size: 10px; color: var(--cream3); letter-spacing: 1px"
+          >
+            Animales modificados por radiación y anomalías
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px">
+            <span class="stamp secret" style="font-size: 8px">СЕКРЕТНО</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-content">
+        <p>
+          Especies animales conocidas alteradas físicamente por exposición a la
+          Zona. Presentan aumento de masa, deformaciones óseas y adaptaciones
+          ofensivas.
+        </p>
+
+        <div class="file-section-title">COMPORTAMIENTO</div>
+        <ul class="file-list">
+          <li>Instinto de caza intensificado</li>
+          <li>Actividad en manadas coordinadas</li>
+          <li>Territorialidad agresiva</li>
+          <li>Alta velocidad y resistencia</li>
+          <li>Ausencia de miedo hacia humanos</li>
+        </ul>
+
+        <p>
+          Conservan patrones animales reconocibles, pero amplificados y
+          distorsionados.
+        </p>
+
+        <div class="lore-fragment">
+          [ BASE BIOLÓGICA CONSERVADA — COMPORTAMIENTO ALTERADO ]
+        </div>
+
+        <div class="threat-level">
+          <span class="threat-badge medio">AMENAZA: MEDIO</span>
+        </div>
+
+        <div class="file-section-title">PROTOCOLO</div>
+        <ul class="file-list">
+          <li>Evitar territorios marcados</li>
+          <li>No interactuar con crías</li>
+          <li>Evitar aislamiento en campo abierto</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- INSECTOIDES -->
+  <div class="panel" id="pe-insec">
+    <div class="panel-header" onclick="togglePanel('pe-insec')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-ENT-G05 · SECRETO</span>
+        <span class="panel-title">INSECTOIDES</span>
+      </div>
+
+      <div class="panel-status">
+        <span
+          class="threat-badge alto"
+          style="padding: 2px 8px; font-size: 9px"
+        >
+          MEDIO-ALTO
+        </span>
+        <div class="status-dot estable"></div>
+        <span class="status-text">ESTABLE</span>
+      </div>
+
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+
+    <div class="panel-body">
+      <div class="entity-header">
+        <img
+          src="images/entities/INSECTOIDES.jpg"
+          alt="Emblema Insectoides"
+          style="width: 64px; height: 64px; object-fit: contain; display: block"
+        />
+
+        <div>
+          <div
+            style="
+              font-family: var(--font-title);
+              font-size: 14px;
+              letter-spacing: 2px;
+              color: var(--cream);
+            "
+          >
+            INSECTOIDES
+          </div>
+
+          <div
+            style="font-size: 10px; color: var(--cream3); letter-spacing: 1px"
+          >
+            Organismos mutados con rasgos artrópodos
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px">
+            <span class="stamp secret" style="font-size: 8px">СЕКРЕТНО</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-content">
+        <p>
+          Criaturas con múltiples extremidades, exoesqueleto parcial o completo
+          y estructuras bucales adaptadas. Algunas muestran fusión con tejido
+          orgánico.
+        </p>
+
+        <div class="file-section-title">COMPORTAMIENTO</div>
+        <ul class="file-list">
+          <li>Alta velocidad de reacción</li>
+          <li>Operan en enjambres</li>
+          <li>Ocupación de espacios cerrados</li>
+          <li>Tácticas de rodeo</li>
+          <li>Persistencia ante bajas</li>
+        </ul>
+
+        <div class="lore-fragment">
+          [ COMPORTAMIENTO COLECTIVO — POSIBLE INTELIGENCIA DISTRIBUIDA ]
+        </div>
+
+        <div class="threat-level">
+          <span class="threat-badge alto">AMENAZA: MEDIO — ALTO</span>
+          <span style="font-size: 10px; color: var(--cream3); margin-left: 8px">
+            (Dependiente del número)
+          </span>
+        </div>
+
+        <div class="file-section-title">PROTOCOLO</div>
+        <ul class="file-list">
+          <li>Evitar espacios confinados</li>
+          <li>No permitir rodeo</li>
+          <li>Neutralizar focos de agrupación</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- PARÁSITOS CONTROLADORES -->
+  <div class="panel" id="pe-para">
+    <div class="panel-header" onclick="togglePanel('pe-para')">
+      <div style="display: flex; flex-direction: column; gap: 3px">
+        <span class="panel-archive-id">ZN-ENT-G07 · SECRETO</span>
+        <span class="panel-title">PARÁSITOS CONTROLADORES</span>
+      </div>
+
+      <div class="panel-status">
+        <span
+          class="threat-badge alto"
+          style="padding: 2px 8px; font-size: 9px"
+        >
+          ALTO
+        </span>
+        <div class="status-dot corrupto"></div>
+        <span class="status-text">CORRUPTO</span>
+      </div>
+
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+
+    <div class="panel-body">
+      <div class="entity-header">
+        <img
+          src="images/entities/PARÁSITOS CONTROLADORES.jpg"
+          alt="Emblema Parásitos"
+          style="width: 64px; height: 64px; object-fit: contain; display: block"
+        />
+
+        <div>
+          <div
+            style="
+              font-family: var(--font-title);
+              font-size: 14px;
+              letter-spacing: 2px;
+              color: var(--cream);
+            "
+          >
+            PARÁSITOS CONTROLADORES
+          </div>
+
+          <div
+            style="font-size: 10px; color: var(--cream3); letter-spacing: 1px"
+          >
+            Entidades con capacidad de control biológico
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px">
+            <span class="stamp secret" style="font-size: 8px">СЕКРЕТНО</span>
+            <span class="stamp warning" style="font-size: 8px">CORRUPTO</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-content">
+        <p>
+          Entidades que invaden organismos vivos o muertos y toman control total
+          del sistema motor. El huésped pierde autonomía.
+        </p>
+
+        <div class="file-section-title">TRANSMISIÓN</div>
+        <ul class="file-list">
+          <li>Contacto directo</li>
+          <li>Entrada por heridas abiertas</li>
+          <li>Uso de cadáveres como vectores</li>
+        </ul>
+
+        <div class="censored">INFORMACIÓN COMPLETA: BLOQUEADA</div>
+
+        <div class="lore-fragment">
+          [ EL HUÉSPED NO SOBREVIVE — SOLO ES UTILIZADO ]
+        </div>
+
+        <!-- BLOQUE DESBLOQUEABLE -->
+        <div class="locked-section">
+          <div class="locked-msg">PROTOCOLO DE INFECCIÓN</div>
+          <div class="locked-sub">Requiere autorización sanitaria</div>
+
+          <div class="access-input-row">
+            <input
+              class="access-input"
+              id="para-input"
+              type="password"
+              placeholder="CÓDIGO"
+            />
+            <button
+              class="access-btn"
+              onclick="unlockSection('para', 'para-input')"
+            >
+              VERIFICAR
+            </button>
+          </div>
+
+          <div
+            id="para-msg"
+            style="font-size: 9px; color: var(--red3); margin-top: 6px"
+          ></div>
+        </div>
+
+        <div id="para-content" style="display: none">
+          <div class="file-section-title">PROTOCOLO</div>
+          <ul class="file-list">
+            <li>Aislamiento inmediato</li>
+            <li>Destrucción total del huésped</li>
+            <li>Descontaminación química</li>
+            <li>Cuarentena de 72 horas</li>
+          </ul>
+
+          <span class="data-error">
+            >> ORIGEN DEL PARÁSITO: NO REGISTRADO
+          </span>
+        </div>
+
+        <div class="threat-level">
+          <span class="threat-badge alto">AMENAZA: ALTO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+          <!-- ══ MONITOR ══ -->
+<div class="section-page" id="page-monitor">
+  <div class="section-header">
+    <div>
+      <div class="section-title-ru">СИСТЕМА МОНИТОРИНГА</div>
+      <div class="section-title">MONITOREO & REGISTRO TAUMATÚRGICO</div>
+    </div>
+    <div class="section-meta">
+      <div class="section-id">MON-TAU // TIEMPO REAL</div>
+    </div>
+  </div>
+
+  <!-- REGISTRO TAUMATÚRGICO -->
+  <div class="taum-container">
+    <div class="taum-title">REGISTRO TAUMATÚRGICO ACTIVO</div>
+    <div class="taum-subtitle">
+      РЕГИСТР ТАМАТУРГИИ — МОНИТОРИНГ В РЕАЛЬНОМ ВРЕМЕНИ
+    </div>
+    <canvas id="taum-canvas" height="80"></canvas>
+    <div class="taum-stats">
+      <div class="taum-stat">
+        <span class="taum-stat-label">FREQ. ANÓMALA</span>
+        <span class="taum-stat-val gold" id="taum-freq">0.00 Hz</span>
+      </div>
+      <div class="taum-stat">
+        <span class="taum-stat-label">INTENSIDAD</span>
+        <span class="taum-stat-val red" id="taum-int">██.█</span>
+      </div>
+      <div class="taum-stat">
+        <span class="taum-stat-label">EVENTOS / MIN</span>
+        <span class="taum-stat-val" id="taum-ev">--</span>
+      </div>
+      <div class="taum-stat">
+        <span class="taum-stat-label">ORIGEN</span>
+        <span class="taum-stat-val" style="font-size: 10px">SECTOR ██</span>
+      </div>
+      <div class="taum-stat">
+        <span class="taum-stat-label">ESTADO</span>
+        <span class="taum-stat-val gold" id="taum-status">ACTIVO</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETECTOR DE BRECHAS -->
+  <div class="breach-container">
+    <div class="breach-gauge-wrap">
+      <canvas id="breach-canvas" width="140" height="140"></canvas>
+    </div>
+    <div class="breach-info">
+      <div class="breach-title">DETECTOR DE BRECHAS — MURALLA EXTERIOR</div>
+      <div class="breach-status-row">
+        <div class="breach-indicator" id="breach-dot"></div>
+        <span class="breach-label" id="breach-label">CARGANDO...</span>
+      </div>
+      <div class="breach-desc" id="breach-desc">
+        Verificando integridad del perímetro...
+      </div>
+      <div class="sector-grid" id="sector-grid">
+        <!-- generado por JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPA SECTORIAL -->
+  <div class="monitor-grid">
+    <div class="monitor-card">
+      <div class="monitor-card-title">ACTIVIDAD ANÓMALA POR SECTOR</div>
+      <canvas id="sector-chart" width="300" height="160"></canvas>
+    </div>
+    <div class="monitor-card">
+      <div class="monitor-card-title">LOG DE EVENTOS — ÚLTIMAS 24H</div>
+      <div
+        id="event-log"
+        style="
+          font-size: 10px;
+          line-height: 1.9;
+          color: var(--cream3);
+          max-height: 140px;
+          overflow-y: auto;
+        "
+      ></div>
+    </div>
+  </div>
+
+  <!-- TABLA ANOMALÍAS -->
+  <div class="panel open" id="p-brechas">
+    <div class="panel-header" onclick="togglePanel('p-brechas')">
+      <span class="panel-title">REGISTRO DE BRECHAS Y ANOMALÍAS ACTIVAS</span>
+      <div class="panel-status">
+        <div class="status-dot inestable"></div>
+        <span class="status-text">EN TIEMPO REAL</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body" style="padding: 0">
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px">
+        <thead>
+          <tr style="background: var(--bg3)">
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              ID
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              TIPO
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              SECTOR
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              ESTADO
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              NIVEL
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              DATOS
+            </th>
+          </tr>
+        </thead>
+        <tbody id="anomaly-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DATOS RESTRINGIDOS MONITOREO -->
+  <div class="panel" id="p-mon-lock">
+    <div class="panel-header" onclick="togglePanel('p-mon-lock')">
+      <span class="panel-archive-id">MON-BRCH-EXT · CLASIFICADO</span>
+      <span class="panel-title">ANÁLISIS DE BRECHAS — DATOS COMPLETOS</span>
+      <div class="panel-status">
+        <span class="panel-class-badge max-secreto">BLOQUEADO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="locked-section">
+        <div class="locked-icon">🔐</div>
+        <div class="locked-msg">
+          DATOS DE ANÁLISIS AVANZADO — NIVEL DIRECTOR
+        </div>
+        <div class="locked-sub">
+          Patrones de expansión, proyecciones y protocolos de cierre de brecha
+        </div>
+        <div class="access-input-row">
+          <input
+            class="access-input"
+            id="monlock-input"
+            placeholder="ДИРЕКТИВА"
+            type="password"
+            autocomplete="off"
+          />
+          <button
+            class="access-btn"
+            onclick="unlockSection('monlock', 'monlock-input')"
+          >
+            VERIFICAR
+          </button>
+        </div>
+        <div
+          style="margin-top: 8px; font-size: 9px; color: var(--red3)"
+          id="monlock-msg"
+        ></div>
+      </div>
+      <div id="monlock-content" style="display: none">
+        <div class="file-content">
+          <div class="file-section-title">
+            PATRONES DE EXPANSIÓN DOCUMENTADOS
+          </div>
+          <p>
+            Los registros indican que las brechas en el perímetro no siguen un
+            patrón geográfico predecible. Su aparición correlaciona con picos de
+            actividad en el registro taumatúrgico interno, especialmente en
+            eventos de duración superior a 40 minutos.
+          </p>
+          <ul class="file-list">
+            <li>
+              Brecha tipo ALFA: apertura por sobrecarga de anomalía localizada —
+              duración media: 2-6 horas
+            </li>
+            <li>
+              Brecha tipo BETA: apertura espontánea sin evento precursor
+              detectable — duración: indeterminada
+            </li>
+            <li>
+              Brecha tipo DELTA: expansión del perímetro interno — no
+              clasificada como brecha estándar
+            </li>
+          </ul>
+          <div class="lore-warning">
+            ⚠ PROTOCOLO DE CIERRE: Ningún procedimiento ha demostrado
+            efectividad consistente en brechas tipo BETA
+          </div>
+          <span class="data-error"
+            >>> DATOS DE PROYECCIÓN: SOLICITANDO AUTORIZACIÓN SUPERIOR...</span
+          >
+          <span class="data-error">>> ACCESO DENEGADO — FIRMA INVÁLIDA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+        </div>
+        <!-- /content -->
+      </div>
+      <!-- /main-layout -->
+    </div>
+    <!-- /app -->
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+      <div class="modal" id="modal">
+        <div class="modal-topbar" id="modal-topbar">
+          <span
+            style="
+              font-family: var(--font-title);
+              font-size: 10px;
+              letter-spacing: 3px;
+              color: var(--gold3);
+            "
+            id="modal-id"
+          ></span>
+          <span
+            style="
+              font-family: var(--font-title);
+              font-size: 13px;
+              letter-spacing: 2px;
+              color: var(--cream);
+              margin-left: 8px;
+            "
+            id="modal-title"
+          ></span>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
