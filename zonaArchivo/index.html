@@ -9,6 +9,23 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
+
+    <audio id="bg-sound" loop>
+      <source src="audios/terminalAudio.m4a" type="audio/mpeg" />
+    </audio>
+
+    <script>
+      const audio = document.getElementById("bg-sound");
+      audio.volume = 0.2; // volumen bajo (importante para que no moleste)
+
+      document.addEventListener(
+        "click",
+        () => {
+          audio.play();
+        },
+        { once: true },
+      );
+    </script>
   </head>
   <body>
     <!-- ═══ LOGIN ═══ -->
