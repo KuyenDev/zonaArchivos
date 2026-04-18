@@ -1,0 +1,270 @@
+<!-- ══ MONITOR ══ -->
+<div class="section-page" id="page-monitor">
+  <div class="section-header">
+    <div>
+      <div class="section-title-ru">СИСТЕМА МОНИТОРИНГА</div>
+      <div class="section-title">MONITOREO & REGISTRO TAUMATÚRGICO</div>
+    </div>
+    <div class="section-meta">
+      <div class="section-id">MON-TAU // TIEMPO REAL</div>
+    </div>
+  </div>
+
+  <!-- REGISTRO TAUMATÚRGICO -->
+  <div class="taum-container">
+    <div class="taum-title">REGISTRO TAUMATÚRGICO ACTIVO</div>
+    <div class="taum-subtitle">
+      РЕГИСТР ТАМАТУРГИИ — МОНИТОРИНГ В РЕАЛЬНОМ ВРЕМЕНИ
+    </div>
+    <canvas id="taum-canvas" height="80"></canvas>
+    <div class="taum-stats">
+      <div class="taum-stat">
+        <span class="taum-stat-label">FREQ. ANÓMALA</span>
+        <span class="taum-stat-val gold" id="taum-freq">0.00 Hz</span>
+      </div>
+      <div class="taum-stat">
+        <span class="taum-stat-label">INTENSIDAD</span>
+        <span class="taum-stat-val red" id="taum-int">██.█</span>
+      </div>
+      <div class="taum-stat">
+        <span class="taum-stat-label">EVENTOS / MIN</span>
+        <span class="taum-stat-val" id="taum-ev">--</span>
+      </div>
+      <div class="taum-stat">
+        <span class="taum-stat-label">ORIGEN</span>
+        <span class="taum-stat-val" style="font-size: 10px">SECTOR ██</span>
+      </div>
+      <div class="taum-stat">
+        <span class="taum-stat-label">ESTADO</span>
+        <span class="taum-stat-val gold" id="taum-status">ACTIVO</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETECTOR DE BRECHAS -->
+  <div class="breach-container">
+    <div class="breach-gauge-wrap">
+      <canvas id="breach-canvas" width="140" height="140"></canvas>
+    </div>
+    <div class="breach-info">
+      <div class="breach-title">DETECTOR DE BRECHAS — MURALLA EXTERIOR</div>
+      <div class="breach-status-row">
+        <div class="breach-indicator" id="breach-dot"></div>
+        <span class="breach-label" id="breach-label">CARGANDO...</span>
+      </div>
+      <div class="breach-desc" id="breach-desc">
+        Verificando integridad del perímetro...
+      </div>
+      <div class="sector-grid" id="sector-grid">
+        <!-- generado por JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPA SECTORIAL -->
+  <div class="monitor-grid">
+    <div class="monitor-card">
+      <div class="monitor-card-title">ACTIVIDAD ANÓMALA POR SECTOR</div>
+      <canvas id="sector-chart" width="300" height="160"></canvas>
+    </div>
+    <div class="monitor-card">
+      <div class="monitor-card-title">LOG DE EVENTOS — ÚLTIMAS 24H</div>
+      <div
+        id="event-log"
+        style="
+          font-size: 10px;
+          line-height: 1.9;
+          color: var(--cream3);
+          max-height: 140px;
+          overflow-y: auto;
+        "
+      ></div>
+    </div>
+  </div>
+
+  <!-- TABLA ANOMALÍAS -->
+  <div class="panel open" id="p-brechas">
+    <div class="panel-header" onclick="togglePanel('p-brechas')">
+      <span class="panel-title">REGISTRO DE BRECHAS Y ANOMALÍAS ACTIVAS</span>
+      <div class="panel-status">
+        <div class="status-dot inestable"></div>
+        <span class="status-text">EN TIEMPO REAL</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body" style="padding: 0">
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px">
+        <thead>
+          <tr style="background: var(--bg3)">
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              ID
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              TIPO
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              SECTOR
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              ESTADO
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              NIVEL
+            </th>
+            <th
+              style="
+                padding: 8px 12px;
+                text-align: left;
+                font-family: var(--font-title);
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--gold3);
+                border-bottom: 1px solid var(--border);
+                font-weight: 400;
+              "
+            >
+              DATOS
+            </th>
+          </tr>
+        </thead>
+        <tbody id="anomaly-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DATOS RESTRINGIDOS MONITOREO -->
+  <div class="panel" id="p-mon-lock">
+    <div class="panel-header" onclick="togglePanel('p-mon-lock')">
+      <span class="panel-archive-id">MON-BRCH-EXT · CLASIFICADO</span>
+      <span class="panel-title">ANÁLISIS DE BRECHAS — DATOS COMPLETOS</span>
+      <div class="panel-status">
+        <span class="panel-class-badge max-secreto">BLOQUEADO</span>
+      </div>
+      <svg class="panel-chevron" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2L8 6L4 10" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </div>
+    <div class="panel-body">
+      <div class="locked-section">
+        <div class="locked-icon">🔐</div>
+        <div class="locked-msg">
+          DATOS DE ANÁLISIS AVANZADO — NIVEL DIRECTOR
+        </div>
+        <div class="locked-sub">
+          Patrones de expansión, proyecciones y protocolos de cierre de brecha
+        </div>
+        <div class="access-input-row">
+          <input
+            class="access-input"
+            id="monlock-input"
+            placeholder="ДИРЕКТИВА"
+            type="password"
+            autocomplete="off"
+          />
+          <button
+            class="access-btn"
+            onclick="unlockSection('monlock', 'monlock-input')"
+          >
+            VERIFICAR
+          </button>
+        </div>
+        <div
+          style="margin-top: 8px; font-size: 9px; color: var(--red3)"
+          id="monlock-msg"
+        ></div>
+      </div>
+      <div id="monlock-content" style="display: none">
+        <div class="file-content">
+          <div class="file-section-title">
+            PATRONES DE EXPANSIÓN DOCUMENTADOS
+          </div>
+          <p>
+            Los registros indican que las brechas en el perímetro no siguen un
+            patrón geográfico predecible. Su aparición correlaciona con picos de
+            actividad en el registro taumatúrgico interno, especialmente en
+            eventos de duración superior a 40 minutos.
+          </p>
+          <ul class="file-list">
+            <li>
+              Brecha tipo ALFA: apertura por sobrecarga de anomalía localizada —
+              duración media: 2-6 horas
+            </li>
+            <li>
+              Brecha tipo BETA: apertura espontánea sin evento precursor
+              detectable — duración: indeterminada
+            </li>
+            <li>
+              Brecha tipo DELTA: expansión del perímetro interno — no
+              clasificada como brecha estándar
+            </li>
+          </ul>
+          <div class="lore-warning">
+            ⚠ PROTOCOLO DE CIERRE: Ningún procedimiento ha demostrado
+            efectividad consistente en brechas tipo BETA
+          </div>
+          <span class="data-error"
+            >>> DATOS DE PROYECCIÓN: SOLICITANDO AUTORIZACIÓN SUPERIOR...</span
+          >
+          <span class="data-error">>> ACCESO DENEGADO — FIRMA INVÁLIDA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
