@@ -10,21 +10,74 @@
     />
     <link rel="stylesheet" href="style.css" />
 
-    <audio id="bg-sound" loop>
-      <source src="audios/terminalAudio.m4a" type="audio/mpeg" />
+    <audio id="bg-sound" loop preload="auto">
+      <source src="audios/terminalAudio.m4a" type="audio/mp4" />
     </audio>
 
-    <script>
-      const audio = document.getElementById("bg-sound");
-      audio.volume = 0.2; // volumen bajo (importante para que no moleste)
+    <audio id="key-sound" src="audios/keyPress.mp3" preload="auto"></audio>
+    <audio id="click-sound" src="audios/click.mp3" preload="auto"></audio>
 
-      document.addEventListener(
-        "click",
-        () => {
-          audio.play();
-        },
-        { once: true },
-      );
+    <script>
+      const bg = document.getElementById("bg-sound");
+      const key = document.getElementById("key-sound");
+      const click = document.getElementById("click-sound");
+
+      let audioEnabled = false;
+
+      // 🔊 CONFIG
+      const BG_VOLUME = 0.15;
+      const KEY_VOLUME = 0.1;
+      const CLICK_VOLUME = 0.12;
+
+      // ▶️ activar audio con interacción
+      function enableAudio() {
+        if (audioEnabled) return;
+        audioEnabled = true;
+
+        bg.volume = 0;
+        bg.play().catch(() => {});
+
+        // fade-in ambiente
+        let v = 0;
+        const fade = setInterval(() => {
+          if (v < BG_VOLUME) {
+            v += 0.01;
+            bg.volume = v;
+          } else {
+            clearInterval(fade);
+          }
+        }, 80);
+      }
+
+      document.addEventListener("click", enableAudio, { once: true });
+
+      // ⌨️ teclado
+      document.addEventListener("keydown", (e) => {
+        if (!audioEnabled) return;
+
+        if (e.key.length > 1 && e.key !== "Backspace" && e.key !== "Enter")
+          return;
+
+        key.currentTime = 0;
+        key.volume = KEY_VOLUME;
+
+        // pequeña variación para que no sea robótico
+        key.playbackRate = 0.95 + Math.random() * 0.1;
+
+        key.play().catch(() => {});
+      });
+
+      // 🖱️ clicks
+      document.addEventListener("mousedown", () => {
+        if (!audioEnabled) return;
+
+        click.currentTime = 0;
+        click.volume = CLICK_VOLUME;
+
+        click.playbackRate = 0.95 + Math.random() * 0.1;
+
+        click.play().catch(() => {});
+      });
     </script>
   </head>
   <body>
